@@ -7,16 +7,32 @@ import os
 # Import routers
 from app.routers import files, auth
 
-app = FastAPI(title="Nityar API", description="Personal dev tools & cloud storage API")
+app = FastAPI(
+    title="Nityar API", 
+    description="Personal dev tools & cloud storage API",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
+)
 
-# Configure CORS
+# Configure CORS with more restrictive settings for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development, restrict in production
+    allow_origins=["https://nityar.com", "https://www.nityar.com"],  # Only allow your domains
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# Add middleware to handle HTTPS
+@app.middleware("http")
+async def https_middleware(request: Request, call_next):
+    response = await call_next(request)
+    # Add security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
