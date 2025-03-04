@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nityar | Pomodoro Timer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jetbrains-mono/1.0.6/web/jetbrains-mono.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-dark: #020617;
+            --secondary: #334155;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --accent: #06b6d4;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background-color: var(--primary-dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-title {
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .pomodoro-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        .timer-display {
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+            position: relative;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timer-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 4px solid var(--secondary);
+            border-radius: 50%;
+        }
+        
+        .timer-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            clip-path: polygon(50% 50%, 50% 0%, 60% 0%, 70% 0%, 80% 0%, 90% 0%, 100% 0%, 100% 10%, 100% 20%, 100% 30%, 100% 40%);
+            transition: clip-path 1s linear;
+        }
+        
+        .timer-status {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: -10px;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .timer-btn {
+            background-color: var(--dark);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .timer-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .timer-btn.start {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .timer-btn.pause {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .timer-btn.reset {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .timer-settings {
+            background-color: var(--dark);
+            padding: 1.5rem;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 2rem;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .settings-title {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+        
+        .settings-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        .form-control {
+            background-color: var(--primary);
+            border: 1px solid var(--secondary);
+            color: var(--light);
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            border-radius: 2px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .session-history {
+            margin-top: 3rem;
+            width: 100%;
+        }
+        
+        .history-title {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--secondary);
+        }
+        
+        .history-table th {
+            color: var(--gray);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        footer {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        /* Mode indicator styles */
+        .mode-indicator {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+        
+        .mode-focus {
+            color: var(--accent);
+        }
+        
+        .mode-break {
+            color: var(--warning);
+        }
+        
+        .mode-long-break {
+            color: var(--success);
+        }
+        
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 4rem;
+                width: 200px;
+                height: 200px;
+            }
+            
+            .settings-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">&lt;Nityar/&gt;</a>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/static/dashboard">Dashboard</a></li>
+                <li><a href="/static/cloud">Cloud</a></li>
+                <li><a href="#" id="logout-btn" class="btn btn-sm btn-outline">$ logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h1 class="page-title">~/tools/pomodoro $ _</h1>
+        
+        <div class="pomodoro-container">
+            <div class="timer-display">
+                <div class="timer-progress" id="timer-progress"></div>
+                <div id="timer">25:00</div>
+            </div>
+            
+            <div class="mode-indicator">
+                <span class="mode-focus" id="mode-text">Focus Mode</span>
+            </div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn start" id="start-btn">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button class="timer-btn pause" id="pause-btn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="timer-btn reset" id="reset-btn">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div class="timer-settings">
+                <h2 class="settings-title">Timer Settings</h2>
+                <form class="settings-form" id="settings-form">
+                    <div class="form-group">
+                        <label for="focus-time">Focus Time (min)</label>
+                        <input type="number" class="form-control" id="focus-time" value="25" min="1" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label for="short-break">Short Break (min)</label>
+                        <input type="number" class="form-control" id="short-break" value="5" min="1" max="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="long-break">Long Break (min)</label>
+                        <input type="number" class="form-control" id="long-break" value="15" min="1" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label for="pomodoro-cycles">Cycles before Long Break</label>
+                        <input type="number" class="form-control" id="pomodoro-cycles" value="4" min="1" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="auto-start">Auto-start Breaks</label>
+                        <select class="form-control" id="auto-start">
+                            <option value="true">Yes</option>
+                            <option value="false" selected>No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sound-enabled">Sound Notification</label>
+                        <select class="form-control" id="sound-enabled">
+                            <option value="true" selected>Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="session-history">
+                <h2 class="history-title">Session History</h2>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Session history will be added here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Nityar. Made with <i class="fas fa-heart" style="color: #06b6d4;"></i> and powered by a Raspberry Pi.</p>
+    </footer>
+    
+    <script>
+        // Pomodoro Timer Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const timerDisplay = document.getElementById('timer');
+            const timerProgress = document.getElementById('timer-progress');
+            const modeText = document.getElementById('mode-text');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const settingsForm = document.getElementById('settings-form');
+            const historyTableBody = document.getElementById('history-table-body');
+            
+            // Audio for notifications
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLHPM+N6wcRwBImPH/fTmxoJEGxcyWL/+/vz7+tzGrJyGcWRaSExYaX2Spr7T5/X7/v7+/Pbt3cq0nIRtVj0tJCUsMj9JVGVwfYqaqrfAyMvR1trb29vY1c/GvK+ghHRlUkQxICYyR1xwf4iNkZWanJ2bmpaSjYeBenRuaGRgXlxbXF5iZnF8iZedqrC3vcDCwsTExMTDwb+8t7GqopuSiYB3b2ZdVE5JRUVFRkpQWGJsdn+Jk52lrLK1t7m6vL29vLu6t7SxramjnZaNhHpwZVtQRz43MSomIiEhIygvOENPXGhye4aPmaCmq6+ys7W1tbW0s7Gvraupp6ShnJeQioN8dGxjWU5DORwQCQkMDAwPDxIVGBwgJCgsMDM2OTw/QUNEREVFQ0JAPTw5NzU0MzIyMTIzNDY4PEBESk9UWWJ1fo2Uo7G7xMzU2d7j5+vt8PLz9PX19PPy8O7r6Ofl4d/c2tbRzMbAs6qhlouDeGteTD8sFQkBAQMICw4RFBcaHSAkJyotMDI0Njg5Ojw9Pj4+Pj08Ozo5NzY1NDMzMzM0NTY4Oz5BREhMUFVbYnF6iZOcsb/N2OPs9fz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD+/Pv5+Pb18/Lw7uzq6Obk4uDe3NrY1tTSz83LyMbDwb68ubezrqmkn5mTjYZ/eHFqY1xVTkdAPDg0MTAvLi4uLzAyMzY4Oz5BQ0ZJS01PUVNVV1haW11eX2BgYWFhYWBgX15cW1lXVVNRTkxJR0RBPjs4NTIvLComIx8cGRYTEQ4MCQcFAwEAAAECAwUHCQwOEBIVFxocHiEkJiksMDM2OTw/QkVIS01QU1VYW11fYWNlZmhpamtsbW1tbWxsamppaGdlZGJgXltYVlRRTkxJRkM/PDk2MzAtKiclIh8cGRYTEQ4LCQcEAgEAAAIEBggLDhASFRgbHiEkJyotMDM2OTxAQ0ZJTFFUVllaW1xdXl9fYGBgYGBfX15dXFtZWFZUUk9MSUZDPzw5NjMwLComIx8cGRYTEA0LCQYEAgABAgUHCg0QEhUYGx4hJCcqLTAzNjk8QENGSUxPUlVXWVtcXV5fYGBgYGBgYF9eXVxbWVhWVFJPTElGQz87ODUyLywpJiMgHRoXFBEODAkHBAIBAAEDBAcJDA8SFBcaHSAjJiksMDM2OTxAQ0ZJS01QU1VYWltdXl9gYWJiYmJiYmFhYF9eXVtaWFZUUU9MSUZDPzw5NjMvLCkmIx8cGRYTEA0LCQYEAgEAAAIDBggLDhETFhkcHyIlKCswMzY5PEBDRklMT1JVV1lbXF5fYGFiYmNjY2NjYmJhYF9eXFtZV1VST01KR0RAPTs4NDEuKiYjHxwYFRIPDAkGBAIBAAEDBAcJCw8SFBcaHSAjJiksMDM2OTxAQ0ZJTFBSU1ZYWlxdXl9gYWJiY2NjY2NjYmJhYF9eXFtZV1VST01KR0RAPTs4NDEuKiYjHxwYFRIPDAkGBAIBAAEDBAcJCw8SFBcaHSAjJiktMDM3Oj1AQ0dKTVBTVVdaW11eYGFiY2RkZWVlZWVkZGNiYWBfXVxaWFZTUU5LSD9EQD07ODUxLiomIx8cGRYTEA0KCAUDAgABAwQHCQwPEhUYGx4hJCgr');
+
+            // Timer state
+            let timerInterval;
+            let isRunning = false;
+            let currentMode = 'focus'; // 'focus', 'shortBreak', 'longBreak'
+            let timeLeft = 25 * 60; // seconds
+            let totalTime = 25 * 60; // seconds
+            let currentCycle = 1;
+            let sessions = [];
+            
+            // Load settings from localStorage or use defaults
+            const settings = {
+                focusTime: parseInt(localStorage.getItem('focusTime')) || 25,
+                shortBreak: parseInt(localStorage.getItem('shortBreak')) || 5,
+                longBreak: parseInt(localStorage.getItem('longBreak')) || 15,
+                cycles: parseInt(localStorage.getItem('pomodoroCycles')) || 4,
+                autoStart: localStorage.getItem('autoStart') === 'true' || false,
+                soundEnabled: localStorage.getItem('soundEnabled') !== 'false', // default to true
+            };
+            
+            // Initialize settings form
+            document.getElementById('focus-time').value = settings.focusTime;
+            document.getElementById('short-break').value = settings.shortBreak;
+            document.getElementById('long-break').value = settings.longBreak;
+            document.getElementById('pomodoro-cycles').value = settings.cycles;
+            document.getElementById('auto-start').value = settings.autoStart.toString();
+            document.getElementById('sound-enabled').value = settings.soundEnabled.toString();
+            
+            // Initialize timer display
+            updateTimerDisplay();
+            
+            // Load history from localStorage
+            if (localStorage.getItem('sessions')) {
+                sessions = JSON.parse(localStorage.getItem('sessions'));
+                updateSessionHistory();
+            }
+            
+            // Event listeners for timer controls
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            
+            // Event listeners for settings form
+            settingsForm.addEventListener('change', function(e) {
+                const settingId = e.target.id;
+                const settingValue = e.target.value;
+                
+                switch(settingId) {
+                    case 'focus-time':
+                        settings.focusTime = parseInt(settingValue);
+                        localStorage.setItem('focusTime', settingValue);
+                        if (currentMode === 'focus' && !isRunning) {
+                            timeLeft = settings.focusTime * 60;
+                            totalTime = timeLeft;
+                            updateTimerDisplay();
+                        }
+                        break;
+                    case 'short-break':
+                        settings.shortBreak = parseInt(settingValue);
+                        localStorage.setItem('shortBreak', settingValue);
+                        if (currentMode === 'shortBreak' && !isRunning) {
+                            timeLeft = settings.shortBreak * 60;
+                            totalTime = timeLeft;
+                            updateTimerDisplay();
+                        }
+                        break;
+                    case 'long-break':
+                        settings.longBreak = parseInt(settingValue);
+                        localStorage.setItem('longBreak', settingValue);
+                        if (currentMode === 'longBreak' && !isRunning) {
+                            timeLeft = settings.longBreak * 60;
+                            totalTime = timeLeft;
+                            updateTimerDisplay();
+                        }
+                        break;
+                    case 'pomodoro-cycles':
+                        settings.cycles = parseInt(settingValue);
+                        localStorage.setItem('pomodoroCycles', settingValue);
+                        break;
+                    case 'auto-start':
+                        settings.autoStart = settingValue === 'true';
+                        localStorage.setItem('autoStart', settingValue);
+                        break;
+                    case 'sound-enabled':
+                        settings.soundEnabled = settingValue === 'true';
+                        localStorage.setItem('soundEnabled', settingValue);
+                        break;
+                }
+            });
+            
+            function startTimer() {
+                if (isRunning) return;
+                
+                isRunning = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                
+                timerInterval = setInterval(function() {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    updateProgressRing();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        completeCycle();
+                    }
+                }, 1000);
+            }
+            
+            function pauseTimer() {
+                if (!isRunning) return;
+                
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+            
+            function resetTimer() {
+                clearInterval(timerInterval);
+                isRunning = false;
+                
+                // Reset to current mode's duration
+                switch(currentMode) {
+                    case 'focus':
+                        timeLeft = settings.focusTime * 60;
+                        break;
+                    case 'shortBreak':
+                        timeLeft = settings.shortBreak * 60;
+                        break;
+                    case 'longBreak':
+                        timeLeft = settings.longBreak * 60;
+                        break;
+                }
+                
+                totalTime = timeLeft;
+                updateTimerDisplay();
+                updateProgressRing();
+                
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+            
+            function completeCycle() {
+                // Play sound notification
+                if (settings.soundEnabled) {
+                    audio.play();
+                }
+                
+                // Record completed session
+                const session = {
+                    date: new Date().toISOString(),
+                    type: currentMode,
+                    duration: getDurationForMode(currentMode),
+                    status: 'completed'
+                };
+                
+                sessions.unshift(session);
+                if (sessions.length > 10) sessions.pop(); // Keep only the last 10 sessions
+                localStorage.setItem('sessions', JSON.stringify(sessions));
+                updateSessionHistory();
+                
+                // Move to the next cycle
+                if (currentMode === 'focus') {
+                    if (currentCycle >= settings.cycles) {
+                        currentMode = 'longBreak';
+                        currentCycle = 1;
+                        modeText.textContent = 'Long Break';
+                        modeText.className = 'mode-long-break';
+                        timeLeft = settings.longBreak * 60;
+                    } else {
+                        currentMode = 'shortBreak';
+                        modeText.textContent = 'Short Break';
+                        modeText.className = 'mode-break';
+                        timeLeft = settings.shortBreak * 60;
+                        currentCycle++;
+                    }
+                } else {
+                    currentMode = 'focus';
+                    modeText.textContent = 'Focus Mode';
+                    modeText.className = 'mode-focus';
+                    timeLeft = settings.focusTime * 60;
+                }
+                
+                totalTime = timeLeft;
+                updateTimerDisplay();
+                updateProgressRing();
+                
+                isRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                
+                // Auto-start next session if enabled
+                if (settings.autoStart) {
+                    setTimeout(startTimer, 1000);
+                }
+            }
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update document title to show timer
+                document.title = `${timerDisplay.textContent} - Nityar Pomodoro`;
+            }
+            
+            function updateProgressRing() {
+                const progress = (1 - timeLeft / totalTime) * 100;
+                const degrees = 3.6 * progress;
+                
+                let clipPath;
+                if (progress <= 0) {
+                    clipPath = `polygon(50% 50%, 50% 0%, 50% 0%)`;
+                } else if (progress <= 12.5) {
+                    clipPath = `polygon(50% 50%, 50% 0%, ${50 + progress * 4}% 0%)`;
+                } else if (progress <= 37.5) {
+                    clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% ${(progress - 12.5) * 4}%)`;
+                } else if (progress <= 62.5) {
+                    clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, ${100 - (progress - 37.5) * 4}% 100%)`;
+                } else if (progress <= 87.5) {
+                    clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% ${100 - (progress - 62.5) * 4}%)`;
+                } else {
+                    clipPath = `polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, ${(progress - 87.5) * 4}% 0%)`;
+                }
+                
+                timerProgress.style.clipPath = clipPath;
+            }
+            
+            function updateSessionHistory() {
+                historyTableBody.innerHTML = '';
+                
+                sessions.forEach(session => {
+                    const row = document.createElement('tr');
+                    
+                    const date = new Date(session.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    
+                    const typeText = session.type === 'focus' ? 'Focus' : 
+                                    session.type === 'shortBreak' ? 'Short Break' : 'Long Break';
+                    
+                    const typeClass = session.type === 'focus' ? 'mode-focus' : 
+                                     session.type === 'shortBreak' ? 'mode-break' : 'mode-long-break';
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td><span class="${typeClass}">${typeText}</span></td>
+                        <td>${session.duration} min</td>
+                        <td>${session.status}</td>
+                    `;
+                    
+                    historyTableBody.appendChild(row);
+                });
+            }
+            function getDurationForMode(mode) {
+                switch(mode) {
+                    case 'focus':
+                        return settings.focusTime;
+                    case 'shortBreak':
+                        return settings.shortBreak;
+                    case 'longBreak':
+                        return settings.longBreak;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
