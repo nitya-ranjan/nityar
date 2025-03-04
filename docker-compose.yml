@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  nityar-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/cloud-storage:/cloud-storage
+    restart: always
+    environment:
+      - CLOUD_STORAGE_PATH=/cloud-storage

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nityar | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jetbrains-mono/1.0.6/web/jetbrains-mono.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-dark: #020617;
+            --secondary: #334155;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --accent: #06b6d4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background-color: var(--primary-dark);
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            background-color: var(--dark);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .login-header h1 {
+            font-size: 1.75rem;
+            color: var(--light);
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            border: 1px solid var(--secondary);
+            color: var(--light);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent);
+            border: none;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.2s;
+        }
+        
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .login-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: var(--accent);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>&lt;Nityar/&gt; <span class="terminal-cursor"></span></h1>
+            <p>~/login $ _</p>
+        </div>
+        
+        <form id="login-form" class="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">$ ./login</button>
+        </form>
+        
+        <div class="login-footer">
+            <p>Default credentials: user1 / password</p>
+        </div>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
